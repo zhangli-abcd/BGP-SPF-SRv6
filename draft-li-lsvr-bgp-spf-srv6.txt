@@ -1,0 +1,409 @@
+
+
+
+
+LSVR                                                            L. Zhang
+Internet-Draft                                                   J. Dong
+Intended status: Standards Track                     Huawei Technologies
+Expires: 9 October 2025                                     7 April 2025
+
+
+Applying BGP-LS Segment Routing over IPv6(SRv6) Extensions to BGP-LS-SPF
+                   draft-li-lsvr-bgp-spf-srv6-latest
+
+Abstract
+
+   For network scenarios such as Massively Scaled Data Centers (MSDCs),
+   BGP is extended for Link-State (LS) distribution and the Shortest
+   Path First (SPF) algorithm based calculation.  BGP-LS-SPF leverages
+   the mechanisms of both BGP protocol and BGP-LS protocol extensions.
+   Segment Routing over IPv6 (SRv6) provides a source routing mechanism
+   that allows a flow to be restricted to a specific topological path,
+   while maintaining per-flow state only at the ingress node(s) to the
+   SRv6 domain.  In some networks, it may be useful to enable SRv6 based
+   source routing mechanism together with BGP-LS-SPF.  This document
+   proposes to introduce the BGP Link-State (BGP-LS) extensions for SRv6
+   to the BGP-LS-SPF SAFI.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 9 October 2025.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  Requirements Language
+   2.  SRv6 Node Attribute TLVs
+     2.1.  SRv6 Capabilities TLV
+     2.2.  SRv6 Node MSD Types
+     2.3.  SR-Algorithm TLV
+   3.  SRv6 Link Attribute TLVs
+     3.1.  SRv6 End.X SID TLV
+     3.2.  L2 Bundele Member Attributes TLV
+     3.3.  SRv6 Link MSD Types
+   4.  SRv6 Prefix Attribute TLVs
+     4.1.  SRv6 Locator TLV
+   5.  SRv6 SID NLRI
+     5.1.  SRv6 SID Information TLV
+     5.2.  SRv6 Endpoint Behavior TLV
+     5.3.  SRv6 SID Structure TLV
+   6.  Operational Considerations
+   7.  Security Considerations
+   8.  IANA Considerations
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
+   Acknowledgments
+   Authors' Addresses
+
+1.  Introduction
+
+   [I-D.ietf-lsvr-bgp-spf] extends BGP for Link-State (LS) distribution
+   and the Shortest Path First (SPF) algorithm based calculation.  BGP-
+   LS-SPF leverages the mechanisms of both BGP protocol [RFC4271] and
+   BGP-LS protocol extensions [RFC9552], with the extensions to BGP-LS
+   attribute and new NLRI selection rules.
+
+   Segment Routing over IPv6 (SRv6) allows for a flexible definition of
+   end-to-end paths within various topologies by encoding paths as
+   sequences of topological or functional sub-paths called "segments".
+   SRv6 provides a mechanism that allows a flow to be restricted to a
+   specific topological path, while maintaining per-flow state only at
+   the ingress node(s) to the SRv6 domain.
+
+   In network scenarios such as Data Center networks, WAN networks or
+   other networks where BGP-LS-SPF can be used as the underlay routing
+   protocol, it may be useful to enable SRv6 based source routing
+   mechanism for traffic engineering and optimization.  This document
+   proposes to introduce the BGP Link-State (BGP-LS) extensions for SRv6
+   to the BGP-LS-SPF SAFI, and discusses which SRv6 extensions can be
+   applied to BGP-LS-SPF SAFI.
+
+1.1.  Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  SRv6 Node Attribute TLVs
+
+   Based on [RFC9514], the following SRv6 Node Attributes TLV SHOULD be
+   supported in BGP-LS-SPF.
+
+               +======+=======================+===========+
+               | Type | Description           | Reference |
+               +======+=======================+===========+
+               | 1138 | SRv6 Capabilities TLV | RFC 9514  |
+               +------+-----------------------+-----------+
+               | 266  | Node MSD TLV          | RFC 8814  |
+               +------+-----------------------+-----------+
+               | 1035 | SR Algorithm TLV      | RFC 9085  |
+               +------+-----------------------+-----------+
+
+                  Table 1: Node Attribute TLVs for SRv6
+                             with BGP-LS-SPF
+
+2.1.  SRv6 Capabilities TLV
+
+   The SRv6 Capabilities TLV defined in [RFC9514] is used to announce
+   the SRv6 capabilities of the node along with the BGP-LS Node NLRI and
+   indicates the SRv6 support by the node.
+
+   For BGP-LS-SPF, it SHOULD support this TLV to announce the SRv6
+   capabilities of BGP-LS-SPF nodes.  A single instance of this TLV MUST
+   be included in the BGP-SPF Node Attribute for each SRv6-capable node.
+   [RFC9514] defines the value of this TLV is copied from the ISIS SRv6
+   Capabilities sub-TLV or from the OSPFv3 SRv6 Capabilities TLV, but
+   both of them have the same flag definition, therefore, the flags
+   format of SRv6 Capabilities TLV of BGP-LS-SPF is consistent with that
+   in ISIS SRv6 Capabilities sub-TLV and OSPFv3 SRv6 Capabilities TLV.
+
+2.2.  SRv6 Node MSD Types
+
+   The Node MSD TLV defined in [RFC8814] is used to advertise the limits
+   and the Segment Routing Header (SRH) operations supported by the
+   SRv6-capable node.
+
+   For BGP-LS-SPF, it SHOULD support this TLV to advertise the limits
+   and operations supported by BGP-LS-SPF node to enable segment
+   routing.  The SRv6 MSD types specified in Section 4 of [RFC9352] are
+   also used with the BGP-LS-SPF Node MSD TLV.
+
+   The SRv6 Node MSD TLV is an optional TLV, for a specific MSD type, if
+   the advertised value is zero or no value is advertised, then the
+   headend can apply an SR Policy that only contains one segment without
+   inserting any SRH header.
+
+2.3.  SR-Algorithm TLV
+
+   [RFC9514] specifies that the algorithm support for SRv6 is advertised
+   via the SR-Algorithm TLV specified in [RFC9085].  The SR-Algorithm is
+   used to advertise the SR algorithms supported by the node.
+
+   This TLV is a basic TLV of SR and SHOULD be supported in BGP-LS-SPF.
+   The format of Algorithm fields in this TLV is consistent with that in
+   ISIS, as defined in Section 3.2 of [RFC8667].
+
+   The SR-Algorithm TLV is an optional TLV, when the originating router
+   does not advertise the SR-Algorithm TLV, it implies that algorithm 0
+   is the only algorithm supported by the router.
+
+3.  SRv6 Link Attribute TLVs
+
+   Based on [RFC9514] and [RFC9085], the following Link Attributes
+   SHOULD be supported in BGP-LS-SPF.
+
+          +======+=================================+===========+
+          | Type | Description                     | Reference |
+          +======+=================================+===========+
+          | 1106 | SRv6 End.X SID TLV              | RFC 9514  |
+          +------+---------------------------------+-----------+
+          | 1106 | L2 Bundle Member Attributes TLV | RFC 9085  |
+          +------+---------------------------------+-----------+
+          | 267  | SRv6 Link MSD TLV               | RFC 8814  |
+          +------+---------------------------------+-----------+
+
+          Table 2: Link Attribute TLVs for SRv6 with BGP-LS-SPF
+
+3.1.  SRv6 End.X SID TLV
+
+   The SRv6 End.X SID TLV defined in [RFC9514] is used to advertise the
+   SRv6 SIDs associated with an IGP Adjacency SID behavior that
+   correspond to a point-to-point or point-to-multipoint link or
+   adjacency of the node running the IS-IS or OSPFv3 protocols.  It is
+   also used by BGP-LS to advertise the BGP EPE Peer Adjacency SID for
+   SRv6 on the same lines as specified for SR-MPLS in [RFC9086].
+
+   BGP-LS-SPF SHOULD support this TLV to advertise the SRv6 SIDs
+   correspond to a point-to-point or adjacency of the node running the
+   BGP-LS-SPF.
+
+3.2.  L2 Bundele Member Attributes TLV
+
+   The L2 Bundle Member Attributes TLV is defined in [RFC9085], it
+   identifies an L2 Bundle Member link, which in turn is associated with
+   a parent L3 link.  The TLV MAY include sub-TLVs that describe
+   attributes associated with the bundle member.
+
+   The network deployed BGP-LS-SPF may include trunk links.  Therefore,
+   BGP-LS-SPF MAY support this TLV to advertise L2 bundle member link
+   attributes.
+
+3.3.  SRv6 Link MSD Types
+
+   The Link MSD TLV defined in [RFC8814] is used to advertise the limits
+   and the SRH operations supported on the specific link by the
+   SRv6-capable node.  BGP-LS-SPF SHOULD support this TLV to advertise
+   the limits and operations supported on the specific link to enable
+   segment routing.  The SRv6 MSD types specified in Section 4 of
+   [RFC9352] are also used with the BGP-LS-SPF Link MSD TLV.
+
+   The SRv6 Link MSD TLV is an optional TLV, for a specific MSD type, if
+   the advertised value is zero or no value is advertised, then the
+   headend can apply an SR Policy that only contains one segment without
+   inserting any SRH header.
+
+4.  SRv6 Prefix Attribute TLVs
+
+   Based on [RFC9514], the BGP-LS SRv6 Prefix Attributes only includes
+   the SRv6 Locator TLV.  This TLV SHOULD be supported by BGP-LS-SPF.
+
+                  +======+==================+===========+
+                  | Type | Description      | Reference |
+                  +======+==================+===========+
+                  | 1162 | SRv6 Locator TLV | RFC 9514  |
+                  +------+------------------+-----------+
+
+                     Table 3: Prefix Attribute TLVs for
+                            SRv6 with BGP-LS-SPF
+
+4.1.  SRv6 Locator TLV
+
+   The SRv6 Locator TLV defined in [RFC9514] is used to advertise the
+   locators supported by each node.  Each locator is advertised in a
+   SRv6 Locator TLV.  Locator is the key component of SRv6 SID, BGP-LS-
+   SPF SHOULD support this TLV to enable segment routing.
+
+   The flags fields of this TLV in BGP-LS-SPF is not used and MUST be
+   set to zero on transmission and MUST be ignored on receipt.
+
+5.  SRv6 SID NLRI
+
+   The SRv6 SID NLRI defined in [RFC9514] is used to carry the SRv6 SID
+   information.  When SRv6 SIDs need to be advertised in BGP-SPF, the
+   following NLRI type and attributes TLV for SRv6 SID SHOULD be
+   supported in BGP-LS-SPF SAFI:
+
+             +======+============================+===========+
+             | Type | NLRI Type                  | Reference |
+             +======+============================+===========+
+             | 6    | SRv6 SID NLRI              | RFC 9514  |
+             +------+----------------------------+-----------+
+             | 518  | SRv6 SID Information TLV   | RFC 9514  |
+             +------+----------------------------+-----------+
+             | 1250 | SRv6 Endpoint Behavior TLV | RFC 9514  |
+             +------+----------------------------+-----------+
+             | 1252 | SRv6 SID Structure TLV     | RFC 9514  |
+             +------+----------------------------+-----------+
+
+                   Table 4: SRv6 SID NLRI with BGP-LS-SPF
+
+   The format of local node descriptors in this NLRI is consistent with
+   BGP-LS local node descriptors Section 5.2.1.2 of [RFC9552], which MAY
+   contain the Autonomous System and BGP-LS Identifier sub-TLV.
+
+5.1.  SRv6 SID Information TLV
+
+   The SRv6 SID Information TLV is used to carry the SRv6 SID associated
+   with a node in a SRv6 SID NLRI.  This TLV SHOULD be supported in BGP-
+   LS-SPF to advertise SRv6 SIDs.
+
+5.2.  SRv6 Endpoint Behavior TLV
+
+   The Endpoint Behavior TLV defined in [RFC9514] is a mandatory TLV
+   included in the BGP-LS Attribute, used to advertise the behaviors
+   associated with a SID.  The BGP-LS-SPF SHOULD support this TLV to
+   enable advertisement of behaviors associated with a SRv6 SID.
+
+5.3.  SRv6 SID Structure TLV
+
+   The SRv6 SID Structure TLV defined in [RFC9514] is used to advertise
+   the length of each individual part of the SRv6 SID as defined in
+   [RFC8986].  It is an optional TLV in the BGP-LS Attribute for SRv6
+   SID NLRI and a sub-TLV of the SRv6 End.X SID.  BGP-LS-SPF MAY support
+   this TLV to indicate the length of each individual part of the SRv6
+   SID of BGP-LS-SPF especially in some scenarios using compressed SID.
+
+6.  Operational Considerations
+
+   TBD
+
+7.  Security Considerations
+
+   This document introduces no additional security vulnerabilities in
+   addition to the ones as described in [RFC9552].
+
+8.  IANA Considerations
+
+9.  References
+
+9.1.  Normative References
+
+   [I-D.ietf-lsvr-bgp-spf]
+              Patel, K., Lindem, A., Zandi, S., and W. Henderickx, "BGP
+              Link-State Shortest Path First (SPF) Routing", Work in
+              Progress, Internet-Draft, draft-ietf-lsvr-bgp-spf-51, 23
+              January 2025, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-lsvr-bgp-spf-51>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC4271]  Rekhter, Y., Ed., Li, T., Ed., and S. Hares, Ed., "A
+              Border Gateway Protocol 4 (BGP-4)", RFC 4271,
+              DOI 10.17487/RFC4271, January 2006,
+              <https://www.rfc-editor.org/rfc/rfc4271>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC8814]  Tantsura, J., Chunduri, U., Talaulikar, K., Mirsky, G.,
+              and N. Triantafillis, "Signaling Maximum SID Depth (MSD)
+              Using the Border Gateway Protocol - Link State", RFC 8814,
+              DOI 10.17487/RFC8814, August 2020,
+              <https://www.rfc-editor.org/rfc/rfc8814>.
+
+   [RFC9085]  Previdi, S., Talaulikar, K., Ed., Filsfils, C., Gredler,
+              H., and M. Chen, "Border Gateway Protocol - Link State
+              (BGP-LS) Extensions for Segment Routing", RFC 9085,
+              DOI 10.17487/RFC9085, August 2021,
+              <https://www.rfc-editor.org/rfc/rfc9085>.
+
+   [RFC9352]  Psenak, P., Ed., Filsfils, C., Bashandy, A., Decraene, B.,
+              and Z. Hu, "IS-IS Extensions to Support Segment Routing
+              over the IPv6 Data Plane", RFC 9352, DOI 10.17487/RFC9352,
+              February 2023, <https://www.rfc-editor.org/rfc/rfc9352>.
+
+   [RFC9514]  Dawra, G., Filsfils, C., Talaulikar, K., Ed., Chen, M.,
+              Bernier, D., and B. Decraene, "Border Gateway Protocol -
+              Link State (BGP-LS) Extensions for Segment Routing over
+              IPv6 (SRv6)", RFC 9514, DOI 10.17487/RFC9514, December
+              2023, <https://www.rfc-editor.org/rfc/rfc9514>.
+
+   [RFC9552]  Talaulikar, K., Ed., "Distribution of Link-State and
+              Traffic Engineering Information Using BGP", RFC 9552,
+              DOI 10.17487/RFC9552, December 2023,
+              <https://www.rfc-editor.org/rfc/rfc9552>.
+
+9.2.  Informative References
+
+   [RFC8667]  Previdi, S., Ed., Ginsberg, L., Ed., Filsfils, C.,
+              Bashandy, A., Gredler, H., and B. Decraene, "IS-IS
+              Extensions for Segment Routing", RFC 8667,
+              DOI 10.17487/RFC8667, December 2019,
+              <https://www.rfc-editor.org/rfc/rfc8667>.
+
+   [RFC8986]  Filsfils, C., Ed., Camarillo, P., Ed., Leddy, J., Voyer,
+              D., Matsushima, S., and Z. Li, "Segment Routing over IPv6
+              (SRv6) Network Programming", RFC 8986,
+              DOI 10.17487/RFC8986, February 2021,
+              <https://www.rfc-editor.org/rfc/rfc8986>.
+
+   [RFC9086]  Previdi, S., Talaulikar, K., Ed., Filsfils, C., Patel, K.,
+              Ray, S., and J. Dong, "Border Gateway Protocol - Link
+              State (BGP-LS) Extensions for Segment Routing BGP Egress
+              Peer Engineering", RFC 9086, DOI 10.17487/RFC9086, August
+              2021, <https://www.rfc-editor.org/rfc/rfc9086>.
+
+Acknowledgments
+
+   TODO acknowledge.
+
+Authors' Addresses
+
+   Li Zhang
+   Huawei Technologies
+   No. 156 Beiqing Road
+   Beijing
+   China
+   Email: zhangli344@huawei.com
+
+
+   Jie Dong
+   Huawei Technologies
+   No. 156 Beiqing Road
+   Beijing
+   China
+   Email: jie.dong@huawei.com
