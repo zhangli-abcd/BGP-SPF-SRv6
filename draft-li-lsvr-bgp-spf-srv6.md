@@ -8,10 +8,9 @@
 ###
 title: "Applying BGP-LS Segment Routing over IPv6(SRv6) Extensions to BGP-LS-SPF"
 abbrev: "BGP-SPF SRv6"
-category: info
+category: std
 
 docname: draft-li-lsvr-bgp-spf-srv6-latest
-category: std
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -88,7 +87,7 @@ Based on {{!RFC9514}}, the following SRv6 Node Attributes TLV SHOULD be supporte
 
 The SRv6 Capabilities TLV defined in {{!RFC9514}} is used to announce the SRv6 capabilities of the node along with the BGP-LS Node NLRI and indicates the SRv6 support by the node.
 
-For BGP-LS-SPF, it SHOULD support this TLV to announce the SRv6 capabilities of BGP-LS-SPF nodes. A single instance of this TLV MUST be included in the BGP-SPF Node Attribute for each SRv6-capable node. {{!RFC9514}} defines the value of this TLV is copied from the ISIS SRv6 Capabilities sub-TLV or from the OSPFv3 SRv6 Capabilities TLV, but both of them have the same flag definition, therefore, the flags format of SRv6 Capabilities TLV of BGP-LS-SPF is consistent with that in ISIS SRv6 Capabilities sub-TLV and OSPFv3 SRv6 Capabilities TLV.
+For BGP-LS-SPF, it SHOULD support this TLV to announce the SRv6 capabilities of BGP-LS-SPF nodes. A single instance of this TLV MUST be included in the BGP-SPF Node Attribute for each SRv6-capable node.{{!RFC9514}} defines the value of this TLV is copied from the ISIS SRv6 Capabilities sub-TLV or from the OSPFv3 SRv6 Capabilities TLV, but both of them have the same flag definition, therefore, the flags format of SRv6 Capabilities TLV of BGP-LS-SPF is consistent with that in ISIS SRv6 Capabilities sub-TLV and OSPFv3 SRv6 Capabilities TLV.
 
 ## SRv6 Node MSD Types
 
