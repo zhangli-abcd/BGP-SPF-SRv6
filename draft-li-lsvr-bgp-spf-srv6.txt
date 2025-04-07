@@ -140,10 +140,10 @@ Table of Contents
 
    For BGP-LS-SPF, it SHOULD support this TLV to announce the SRv6
    capabilities of BGP-LS-SPF nodes.  A single instance of this TLV MUST
-   be included in the BGP-SPF Node Attribute for each SRv6-capable node.
-   [RFC9514] defines the value of this TLV is copied from the ISIS SRv6
-   Capabilities sub-TLV or from the OSPFv3 SRv6 Capabilities TLV, but
-   both of them have the same flag definition, therefore, the flags
+   be included in the BGP-SPF Node Attribute for each SRv6-capable
+   node.[RFC9514] defines the value of this TLV is copied from the ISIS
+   SRv6 Capabilities sub-TLV or from the OSPFv3 SRv6 Capabilities TLV,
+   but both of them have the same flag definition, therefore, the flags
    format of SRv6 Capabilities TLV of BGP-LS-SPF is consistent with that
    in ISIS SRv6 Capabilities sub-TLV and OSPFv3 SRv6 Capabilities TLV.
 
