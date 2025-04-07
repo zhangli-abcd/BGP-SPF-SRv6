@@ -176,7 +176,7 @@ The SRv6 SID NLRI defined in {{!RFC9514}} is used to carry the SRv6 SID informat
 {: #ref-to-tab7 title="SRv6 SID NLRI with BGP-LS-SPF"}
 
 The format of local node descriptors in this NLRI is consistent with BGP-LS local node descriptors {{Section 5.2.1.2 of ?RFC9552}}, which MAY contain the Autonomous System and BGP-LS Identifier sub-TLV.
-  
+
 ## SRv6 SID Information TLV
 
 The SRv6 SID Information TLV is used to carry the SRv6 SID associated with a node in a SRv6 SID NLRI. This TLV SHOULD be supported in BGP-LS-SPF to advertise SRv6 SIDs.
